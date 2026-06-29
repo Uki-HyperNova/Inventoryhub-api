@@ -23,21 +23,7 @@ def create_app():
 
     register_blueprints(app)
     
-    @app.route("/", methods=["GET"])
-    def api_home():
-        return jsonify({
-            "message": "Student Management API",
-            "version": "1.0",
-            "endpoints": {
-                "students": "/api/students",
-                "courses": "/api/courses",
-                "auth": {
-                    "register": "/api/auth/register",
-                    "login": "/api/auth/login"
-                }
-            }
-        })
-
+   
 
     @app.errorhandler(OperationalError)
     def handle_operational_error(err):
