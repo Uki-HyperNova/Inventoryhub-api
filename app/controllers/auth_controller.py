@@ -29,7 +29,7 @@ def _validate_register_payload(data):
     if password is None or str(password).strip()== "": 
          errors.append("password is required.")
 
-    if not len(str(password)) < 6 :
+    if not len(str(password)) > 6 :
          return ("password must be contain 6 letters")
     
     

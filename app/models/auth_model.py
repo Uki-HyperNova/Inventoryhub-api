@@ -9,7 +9,7 @@ class Auth(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=utc_now)
-    role =db.Column(db.String,default="staff")
+    role =db.Column(db.String(5),default="staff")
 
     def set_password(Self, password):
         Self.password = generate_password_hash(password)
