@@ -1,112 +1,134 @@
-from flask import jsonify, request 
-from flask_jwt_extended import current_user
-from app.utils import datetime
+from flask import jsonify, request
+from flask_jwt_extended import jwt_required
 
 from app.extensions import db
 from app.models.product_model import Product
 
-def _validate_product_payload(data):
-    errors = []
-   
+
+def _validate_product_payload(data, partial=False):
+    errors =[]
+
     if not data:
         return ["Request body is required."]
 
-    
-   
-    if "name" in data:
+    if "name" in data or not partial:
         name = data.get("name")
         if name is None or str(name).strip() == "":
-            errors.append("name cannot be empty.")
-    
+            errors.append("name is required.")
 
-    
-    if "price" in data:
-        price = data.get("price")
-        if price is None or str(price).strip() == "":
-            errors.append("price cannot be empty.")
-   
-
-
-    if "quantity" in data:
-        quantity = data.get("quantity")
-        if quantity is None or int(quantity).strip() == "":
-            errors.append("quantity cannot be empty.")
-
-
-    
-    if "category" in data:
-        category = data.get("category")
-        if category is None or int(category).strip() == "":
-            errors.append("category cannot be empty.")
-    
-
-    if "sku" in data:
+    if "sku" in data or not partial:
         sku = data.get("sku")
-        if sku is None or int(sku).strip() == "":
-            errors.append("sku cannot be empty.")
-   
-   
-    
+        if sku is None or str(sku).strip() == "":
+            errors.append("sku is required.")
 
-        
-    return errors 
+    if "category" in data or not partial:
+        category = data.get("category")
+        if category is None or str(category).strip() == "":
+            errors.append("category is required.")
 
-    
-def get_all_products():
-    try:
-        products = Product.query.all()
-        return jsonify({"products": [p.to_dict() for p in products]}), 200
-    except Exception:
-        return jsonify({"error": "An internal server error occurred."}), 500
-           
-def get_product(product_id):
-    try:
-        product = db.session.get(Product, product_id)
-        if not product:
-            return jsonify({"error": "Product not found."}), 404
-        return jsonify({"product": product.to_dict()}), 200
-    except Exception:
-        return jsonify({"error": "An internal server error occurred."}), 500
+    if "price" in data or not partial:
+        price = data.get("price")
+        if price is None:
+            errors.append("price is required.")
+        else:
+            try:
+                float(price)
+            except (TypeError, ValueError):
+                errors.append("price must be a number.")
 
+    if "quantity" in data or not partial:
+        quantity = data.get("quantity")
+        if quantity is None:
+            errors.append("quantity is required.")
+        else:
+            try:
+                int(quantity)
+            except (TypeError, ValueError):
+                errors.append("quantity must be a whole number.")
+
+    return errors
+
+
+@jwt_required()
 def create_product():
-    data = request.get_json(force=True)
-
-    if not data:
-        return jsonify({"error":"Request body is required/"})
-    
+    data = request.get_json(silent=True)
     errors = _validate_product_payload(data)
     if errors:
         return jsonify({"errors": errors}), 400
-    
-    try:
-        product =Product(
-            name =data.get("name").strip(),
-            price = float(data.get("price")),
-            category = data.get("category"),
-            quantity = data.get("quantity"),
-            sku = data.get("sku")
-        )
-        pick =str(product)
 
-        db.session.add(pick)
+    try:
+        product = Product(
+            name=str(data.get("name")).strip(),
+            sku=str(data.get("sku")).strip(),
+            category=str(data.get("category")).strip(),
+            price=float(data.get("price")),
+            quantity=int(data.get("quantity")),
+        )
+        db.session.add(product)
         db.session.commit()
-        return jsonify({"message":"Product is created"})
+        return jsonify({"message": "Product created successfully.", "product": product.to_dict()}), 201
     except Exception:
         db.session.rollback()
-        return jsonify({"error":"An internal error occurred."})
-
-    
+        return jsonify({"error": "An internal server error occurred."}), 500
 
 
-def delete_product(product_id):
+@jwt_required()
+def update_product(id):
+    product = db.session.get(Product, id)
+    if not product:
+        return jsonify({"error": "Product not found."}), 404
+
+    data = request.get_json(silent=True)
+    errors = _validate_product_payload(data, partial=True)
+    if errors:
+        return jsonify({"errors": errors}), 400
+
     try:
-        product = db.session.get(Product, product_id)
-        if not product:
-            return jsonify({"error": "Product not found."}), 404
-        
+        if "name" in data:
+            product.name = str(data.get("name")).strip()
+        if "sku" in data:
+            product.sku = str(data.get("sku")).strip()
+        if "category" in data:
+            product.category = str(data.get("category")).strip()
+        if "price" in data:
+            product.price = float(data.get("price"))
+        if "quantity" in data:
+            product.quantity = int(data.get("quantity"))
+
+        db.session.commit()
+        return jsonify({"message": "Product updated successfully.", "product": product.to_dict()}), 200
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "An internal server error occurred."}), 500
+
+
+@jwt_required()
+def delete_product(id):
+    product = db.session.get(Product, id)
+    if not product:
+        return jsonify({"error": "Product not found."}), 404
+
+    try:
         db.session.delete(product)
         db.session.commit()
         return jsonify({"message": "Product deleted successfully."}), 200
     except Exception:
         db.session.rollback()
         return jsonify({"error": "An internal server error occurred."}), 500
+
+
+@jwt_required()
+def list_products():
+    try:
+        products = Product.query.order_by(Product.id.desc()).all()
+        return jsonify({"products": [p.to_dict() for p in products]}), 200
+    except Exception:
+        return jsonify({"error": "An internal server error occurred."}), 500
+
+
+@jwt_required()
+def get_product(id):
+    product = db.session.get(Product, id)
+    if not product:
+        return jsonify({"error": "Product not found."}), 404
+    return jsonify({"product": product.to_dict()}), 200

@@ -13,13 +13,12 @@ class Product(db.Model):
     sku = db.Column(db.String(50),nullable=False,unique=True)
 
     def to_dict(self):
-        """Return a dictionary representation of the product."""
+     
         return {
             "id": self.id,
             "name": self.name,
             "price": self.price,
             "category":self.category,
             "quantity":self.quantity,
-            "sku":self.sku
-            
+            "sku":self.sku,
         }
