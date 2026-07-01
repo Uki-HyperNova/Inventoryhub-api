@@ -1,20 +1,24 @@
 from flask import Blueprint
 from app.controllers import product_contoller as ctrl
 
-auth_bp = Blueprint("product", __name__, url_prefix="/api/product")
+product_bp = Blueprint("product", __name__, url_prefix="/api/products")
 
-@auth_bp.route("/create", methods=["POST"])
-def register():
+@product_bp.route("", methods=["POST"])
+def create_product():
     return ctrl.create_product()
 
-@auth_bp.route("/edit", methods=["UPDATE"])
-def login():
-    return ctrl.update_product()
-
-@auth_bp.route("/list", methods=["GET"])
-def register():
+@product_bp.route("", methods=["GET"])
+def list_products():
     return ctrl.list_products()
 
-@auth_bp.route("/list/{id}", methods=["GET"])
-def register():
-    return ctrl.list_product()
+@product_bp.route("/<int:id>", methods=["GET"])
+def get_product(id):
+    return ctrl.get_product(id)
+
+@product_bp.route("/<int:id>", methods=["PUT"])
+def update_product(id):
+    return ctrl.update_product(id)
+
+@product_bp.route("/<int:id>", methods=["DELETE"])
+def delete_product(id):
+    return ctrl.delete_product(id)
