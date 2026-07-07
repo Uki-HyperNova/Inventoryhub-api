@@ -36,6 +36,7 @@ class Config:
         # pre-pinging avoids "MySQL server has gone away" errors.
         "pool_pre_ping": True,
         "pool_recycle": 280,
+        "connect_args": {"connect_timeout": 5},
     }
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key-change-me")

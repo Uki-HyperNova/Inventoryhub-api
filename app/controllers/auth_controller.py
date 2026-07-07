@@ -4,6 +4,7 @@ from email_validator import validate_email, EmailNotValidError
 
 from app.extensions import db
 from app.models.auth_model import Auth
+from app.utils import get_json_body
 
 def _validate_register_payload(data):
     errors = []
@@ -45,9 +46,9 @@ def _validate_login_payload(data):
     return errors
 
 def register():
-    data = request.get_json(silent=True)
+    data = get_json_body()
     if not data:
-        return jsonify({"error": "Request body is required."}), 400
+        return jsonify({"error": "Request body must be a JSON object."}), 400
     
     errors = _validate_register_payload(data)
 
@@ -72,9 +73,9 @@ def register():
 
 
 def login():
-    data = request.get_json(silent=True)
+    data = get_json_body()
     if not data:
-        return jsonify({"error": "Request body is required."}), 400
+        return jsonify({"error": "Request body must be a JSON object."}), 400
 
     errors = _validate_login_payload(data)
     if errors:

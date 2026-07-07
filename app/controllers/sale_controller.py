@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.product_model import Product
 from app.models.sale_model import Sale, SaleItem
+from app.utils import get_json_body
 
 
 def _validate_sale_payload(data):
@@ -39,7 +40,7 @@ def _validate_sale_payload(data):
 
 @jwt_required()
 def create_sale():
-    data = request.get_json(silent=True)
+    data = get_json_body()
     errors = _validate_sale_payload(data)
     if errors:
         return jsonify({"errors": errors}), 400

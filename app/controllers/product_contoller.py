@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required
 
 from app.extensions import db
 from app.models.product_model import Product
+from app.utils import get_json_body
 
 
 def _validate_product_payload(data, partial=False):
@@ -56,7 +57,7 @@ def _validate_product_payload(data, partial=False):
 
 
 def create_product():
-    data = request.get_json(silent=True)
+    data = get_json_body()
     errors = _validate_product_payload(data)
     if errors:
         return jsonify({"errors": errors}), 400
@@ -84,7 +85,7 @@ def update_product(id):
     if not product:
         return jsonify({"error": "Product not found."}), 404
 
-    data = request.get_json(silent=True)
+    data = get_json_body()
     errors = _validate_product_payload(data, partial=True)
     if errors:
         return jsonify({"errors": errors}), 400
@@ -131,7 +132,7 @@ def restock_product(id):
     if not product:
         return jsonify({"error": "Product not found."}), 404
 
-    data = request.get_json(silent=True)
+    data = get_json_body()
     if not data:
         return jsonify({"error": "Request body is required."}), 400
 
