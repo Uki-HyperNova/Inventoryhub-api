@@ -1,5 +1,3 @@
-import re
-
 from flask import jsonify, request 
 from flask_jwt_extended import create_access_token
 from email_validator import validate_email, EmailNotValidError
@@ -9,37 +7,26 @@ from app.models.auth_model import Auth
 
 def _validate_register_payload(data):
     errors = []
-    
-    if not data:
-        return["Request body is required."]
-    email = data.get("email")
 
+    if not data:
+        return ["Request body is required."]
+
+    email = data.get("email")
     if email is None or str(email).strip() == "":
         errors.append("email is required.")
-    
-    email_str = str(email).strip() 
-    try:
-            emailinfo = validate_email(email_str, check_deliverability = False)
-            email = emailinfo.normalized
-    except EmailNotValidError as e:
+    else:
+        try:
+            validate_email(str(email).strip(), check_deliverability=False)
+        except EmailNotValidError as e:
             errors.append(str(e))
 
+    password = data.get("password")
+    if password is None or str(password).strip() == "":
+        errors.append("password is required.")
+    elif len(str(password)) < 6:
+        errors.append("password must be at least 6 characters.")
 
-    password =data.get("password")
-
-    if password is None or str(password).strip()== "": 
-         errors.append("password is required.")
-
-    if not len(str(password)) > 6 :
-         return ("password must be contain 6 letters")
-    
-    
-    
-       
-
-
-
-
+    return errors
 
 def _validate_login_payload(data):
     errors = []
