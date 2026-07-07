@@ -25,7 +25,7 @@ def _build_database_uri():
     db_port = os.getenv("MYSQLPORT") or os.getenv("DB_PORT", "3306")
     db_name = os.getenv("MYSQLDATABASE") or os.getenv("DB_NAME", "inventoryhub_db")
 
-    return f"mysql:pymysql//root:KLHSbgvNmTfYANrpowrzKvyCMLwFyEcQ@hayabusa.proxy.rlwy.net:10205/railway"
+    return f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 
 class Config:
