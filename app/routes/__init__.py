@@ -1,7 +1,7 @@
 from app.routes.auth_routes import auth_bp
-from app.routes.dashboard_routes import dashboard_bp
 from app.routes.product_routes import product_bp
 from app.routes.sale_routes import sale_bp
+from app.routes.dashboard_routes import dashboard_bp
 
 
 def register_blueprints(app):

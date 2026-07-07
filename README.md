@@ -1,110 +1,83 @@
-# InventoryHub API
+# InventoryHub
 
-Flask REST API for inventory management, connected to MySQL via SQLAlchemy.
+A full-stack inventory management system built with Next.js and Flask.
 
-## Tech Stack
+---
 
-- Flask 3
-- Flask-SQLAlchemy + PyMySQL
-- Flask-Migrate (Alembic)
-- Flask-JWT-Extended
-- Flask-CORS
+## Prerequisites
+
+- Node.js 18+
+- Python 3.11+
 - MySQL
 
-## Setup
+---
 
-### 1. Create virtual environment
+## Backend Setup
 
 ```bash
-cd Inventoryhub-api
+cd backend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment
-
-Copy `.env.example` to `.env` and update values:
+Create a `.env` file in `/backend`:
 
 ```env
-DATABASE_URL=mysql+pymysql://root:your_password@localhost/inventoryhub_db
-JWT_SECRET_KEY=your-secret-key
-JWT_ACCESS_TOKEN_EXPIRES_MINUTES=60
-FLASK_APP=run:app
+DB_NAME=inventoryhub_db
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+JWT_SECRET_KEY=your_secret_key
+JWT_TIMEOUT=15
 ```
 
-### 3. Create MySQL database
-
-```sql
-CREATE DATABASE IF NOT EXISTS inventoryhub_db;
-```
-
-### 4. Run migrations
-
-```bash
-flask db init        # first time only
-flask db migrate -m "Initial schema"
-flask db upgrade
-```
-
-### 5. Start server
+Run the server:
 
 ```bash
 python run.py
 ```
 
-API base URL: `http://localhost:5000/api`
+Backend runs at `http://localhost:5000`
 
-## Database Schema
+---
 
-| Table | Description |
-|-------|-------------|
-| `users` | Staff accounts (hashed passwords) |
-| `products` | Inventory items with SKU, price, quantity, low stock threshold |
-| `sales` | Sale records with auto-generated invoice numbers |
-| `sale_items` | Line items linked to sales and products |
+## Frontend Setup
 
-## API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | No | Register staff account |
-| POST | `/api/auth/login` | No | Login and receive JWT |
-| GET | `/api/auth/me` | Yes | Get current user |
-| GET | `/api/products` | Yes | List all products |
-| POST | `/api/products` | Yes | Create product |
-| GET | `/api/products/:id` | Yes | Get single product |
-| PUT | `/api/products/:id` | Yes | Update product |
-| DELETE | `/api/products/:id` | Yes | Delete product |
-| POST | `/api/sales` | Yes | Record sale (reduces stock) |
-| GET | `/api/sales` | Yes | List sales history |
-| GET | `/api/dashboard` | Yes | Dashboard analytics |
-
-## Response Format
-
-All endpoints return consistent JSON:
-
-```json
-{
-  "success": true,
-  "message": "...",
-  "data": {}
-}
+```bash
+cd frontend
+npm install
 ```
 
-## Testing
+Create a `.env.local` file in `/frontend`:
 
-See [API_TESTING.md](./API_TESTING.md) for Thunder Client collection and test cases.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
 
-Import from `thunder-client/`:
-- `Inventory_Management_System_API.json`
-- `thunderEnvironment.json`
+Run the dev server:
 
-## Business Rules
+```bash
+npm run dev
+```
 
-- SKU must be unique
-- Price and quantity cannot be negative
-- Sales reduce product stock atomically
-- Sales blocked when stock is insufficient
-- Low stock: `quantity <= low_stock_threshold`
-- Passwords hashed with Werkzeug before storage
+Frontend runs at `http://localhost:3000`
+
+---
+
+## Auth Endpoints
+
+| Method | Endpoint             | Description       |
+|--------|----------------------|-------------------|
+| POST   | `/api/auth/register` | Register new user |
+| POST   | `/api/auth/login`    | Login and get JWT |
+
+---
+
+## Pages
+
+| Path               | Description   |
+|--------------------|---------------|
+| `/Auth/login`      | Login page    |
+| `/Auth/register`   | Register page |
+| `/staff/dashboard` | Dashboard     |

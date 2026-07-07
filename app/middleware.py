@@ -10,14 +10,9 @@ def roles_required(*roles):
         def wrapper(*args, **kwargs):
             verify_jwt_in_request()
             if not current_user:
-                return jsonify({"success": False, "message": "User not found."}), 404
+                return jsonify({"error": "User not found."}), 404
             if current_user.role not in roles:
-                return jsonify(
-                    {
-                        "success": False,
-                        "message": "Access forbidden: insufficient permissions.",
-                    }
-                ), 403
+                return jsonify({"error": "Access forbidden: insufficient permissions."}), 403
             return fn(*args, **kwargs)
         return wrapper
     return decorator
