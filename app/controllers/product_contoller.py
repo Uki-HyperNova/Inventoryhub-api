@@ -46,10 +46,15 @@ def _validate_product_payload(data, partial=False):
             except (TypeError, ValueError):
                 errors.append("quantity must be a whole number.")
 
+    if "low_stock_threshold" in data and data.get("low_stock_threshold") is not None:
+        try:
+            int(data.get("low_stock_threshold"))
+        except (TypeError, ValueError):
+            errors.append("low_stock_threshold must be a whole number.")
+
     return errors
 
 
-@jwt_required()
 def create_product():
     data = request.get_json(silent=True)
     errors = _validate_product_payload(data)
@@ -63,6 +68,7 @@ def create_product():
             category=str(data.get("category")).strip(),
             price=float(data.get("price")),
             quantity=int(data.get("quantity")),
+            low_stock_threshold=int(data.get("low_stock_threshold")) if data.get("low_stock_threshold") is not None else 5,
         )
         db.session.add(product)
         db.session.commit()
@@ -94,6 +100,8 @@ def update_product(id):
             product.price = float(data.get("price"))
         if "quantity" in data:
             product.quantity = int(data.get("quantity"))
+        if "low_stock_threshold" in data and data.get("low_stock_threshold") is not None:
+            product.low_stock_threshold = int(data.get("low_stock_threshold"))
 
         db.session.commit()
         return jsonify({"message": "Product updated successfully.", "product": product.to_dict()}), 200
@@ -112,6 +120,34 @@ def delete_product(id):
         db.session.delete(product)
         db.session.commit()
         return jsonify({"message": "Product deleted successfully."}), 200
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "An internal server error occurred."}), 500
+
+
+@jwt_required()
+def restock_product(id):
+    product = db.session.get(Product, id)
+    if not product:
+        return jsonify({"error": "Product not found."}), 404
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Request body is required."}), 400
+
+    quantity = data.get("quantity")
+    try:
+        quantity = int(quantity)
+    except (TypeError, ValueError):
+        return jsonify({"errors": ["quantity must be a whole number."]}), 400
+
+    if quantity <= 0:
+        return jsonify({"errors": ["quantity must be greater than zero."]}), 400
+
+    try:
+        product.quantity += quantity
+        db.session.commit()
+        return jsonify({"message": "Product restocked successfully.", "product": product.to_dict()}), 200
     except Exception:
         db.session.rollback()
         return jsonify({"error": "An internal server error occurred."}), 500
