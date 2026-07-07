@@ -10,3 +10,7 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     return ctrl.login()
+
+@auth_bp.route("/me", methods=["GET"])
+def get_me():
+    return ctrl.get_me()
