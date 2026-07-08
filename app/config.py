@@ -46,5 +46,5 @@ class Config:
     hours = os.getenv("JWT_TIMEOUT")
     chours = hours * 60 * 24
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(
-        minutes=int(chours)
+        minutes=int("chours")
     )
