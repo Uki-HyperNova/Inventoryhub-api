@@ -43,7 +43,9 @@ class Config:
     # Flask-JWT-Extended reads JWT_ACCESS_TOKEN_EXPIRES specifically — the
     # previous JWT_TIMEOUT key was never read by the library, so tokens
     # silently never expired.
-   
+    TOKEN = os.getenv("JWT_TIMEOUT")
+    DAYS = TOKEN * 60 * 24
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(
-        minutes=int(os.getenv("JWT_TIMEOUT", "15"))
+        minutes=int("DAYS")
     )
+    # os.getenv("JWT_TIMEOUT", "15")
