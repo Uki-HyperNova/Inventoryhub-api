@@ -46,6 +46,6 @@ class Config:
     TOKEN = os.getenv("JWT_TIMEOUT")
     DAYS = TOKEN * 60 * 24
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(
-        minutes=int("DAYS")
+        minutes=int(DAYS)
     )
     # os.getenv("JWT_TIMEOUT", "15")
